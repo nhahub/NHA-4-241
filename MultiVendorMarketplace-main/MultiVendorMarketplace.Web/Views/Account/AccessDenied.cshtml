@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="max-w-md mx-auto text-center py-16 px-6 rounded-3xl bg-slate-950/20 border border-slate-800 space-y-6 shadow-xl">
+    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+        <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+    </div>
+    <h1 class="text-2xl font-extrabold text-white tracking-tight">Access Denied</h1>
+    <p class="text-sm text-slate-400">
+        You do not have the required permissions or user role to view this panel.
+    </p>
+    <div class="flex justify-center pt-4">
+        <a asp-controller="Home" asp-action="Index" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-6 rounded-xl transition">
+            Return to Marketplace
+        </a>
+    </div>
+</div>

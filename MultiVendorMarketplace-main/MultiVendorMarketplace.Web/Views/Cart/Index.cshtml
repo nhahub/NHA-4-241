@@ -1,0 +1,130 @@
+@model MultiVendorMarketplace.Application.Models.Cart
+@{
+    ViewData["Title"] = "Your Shopping Cart";
+}
+
+<!-- Step Progress Bar -->
+<div class="mb-8 max-w-lg mx-auto">
+    <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <span class="text-indigo-400 flex items-center"><span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center mr-1.5 text-[9px]">1</span> Cart</span>
+        <span class="w-12 h-px bg-slate-800"></span>
+        <span class="flex items-center text-slate-600"><span class="w-5 h-5 rounded-full bg-slate-900 text-slate-600 flex items-center justify-center mr-1.5 text-[9px]">2</span> Checkout</span>
+        <span class="w-12 h-px bg-slate-800"></span>
+        <span class="flex items-center text-slate-600"><span class="w-5 h-5 rounded-full bg-slate-900 text-slate-600 flex items-center justify-center mr-1.5 text-[9px]">3</span> Payment</span>
+        <span class="w-12 h-px bg-slate-800"></span>
+        <span class="flex items-center text-slate-600"><span class="w-5 h-5 rounded-full bg-slate-900 text-slate-600 flex items-center justify-center mr-1.5 text-[9px]">4</span> Success</span>
+    </div>
+</div>
+
+<h1 class="text-3xl font-extrabold text-white mb-8 tracking-tight">Shopping Cart</h1>
+
+@if (!Model.Items.Any())
+{
+    <div class="text-center py-20 p-8 rounded-2xl bg-slate-950/20 border border-dashed border-slate-800/80 flex flex-col items-center">
+        <svg class="h-16 w-16 text-slate-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+        </svg>
+        <h3 class="text-base font-bold text-white">Your cart is empty</h3>
+        <p class="mt-1.5 text-xs text-slate-500 max-w-xs leading-relaxed">Add products from the marketplace before checking out.</p>
+        <a asp-controller="Home" asp-action="Index" class="mt-6 inline-block bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition">Browse Products</a>
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items List -->
+        <div class="lg:col-span-2 space-y-4">
+            @foreach (var item in Model.Items)
+            {
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-slate-900/20 border border-slate-800/80 gap-6">
+                    <div class="flex items-center space-x-4">
+                        <img src="@item.ImageUrl" alt="@item.ProductName" class="w-16 h-16 rounded-xl object-cover border border-slate-800 shrink-0" />
+                        <div>
+                            <h3 class="text-sm font-bold text-white line-clamp-1">@item.ProductName</h3>
+                            <p class="text-[10px] text-slate-500 italic">Sold by: @item.VendorName</p>
+                            <p class="text-xs font-semibold text-slate-400 mt-1">@item.Price.ToString("C") each</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-6 w-full sm:w-auto justify-between sm:justify-end">
+                        <!-- Adjust Quantity Form using Stepper Buttons -->
+                        <form asp-controller="Cart" asp-action="UpdateQuantity" method="post" class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition font-bold text-sm select-none">-</button>
+                            <span class="w-10 text-center text-xs text-white font-semibold">@item.Quantity</span>
+                            <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition font-bold text-sm select-none">+</button>
+                        </form>
+
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-bold text-white">@item.TotalPrice.ToString("C")</p>
+                            
+                            <!-- Remove Item Form -->
+                            <form asp-controller="Cart" asp-action="RemoveFromCart" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition mt-1">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="flex justify-between items-center pt-2">
+                <form asp-controller="Cart" asp-action="Clear" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="text-xs text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 px-3.5 py-2 rounded-xl transition font-bold flex items-center space-x-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        <span>Empty Cart</span>
+                    </button>
+                </form>
+                <a asp-controller="Home" asp-action="Index" class="text-xs text-indigo-400 hover:text-indigo-300 font-bold transition flex items-center">
+                    Continue Shopping
+                    <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Order Summary Box -->
+        <div class="lg:col-span-1">
+            <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-6 shadow-xl">
+                <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3">Order Summary</h2>
+                
+                <div class="space-y-3 text-xs text-slate-400">
+                    <div class="flex justify-between">
+                        <span>Items count</span>
+                        <span class="text-white font-medium">@Model.TotalItems</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span class="text-white font-medium">@Model.TotalAmount.ToString("C")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax / Shipping</span>
+                        <span class="text-emerald-400 font-bold">FREE</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-850 pt-4 flex justify-between items-baseline">
+                    <span class="text-xs font-bold text-slate-400">Estimated Total</span>
+                    <span class="text-xl font-black text-indigo-400">@Model.TotalAmount.ToString("C")</span>
+                </div>
+
+                <a asp-controller="Checkout" asp-action="Index" class="w-full block text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 text-xs">
+                    Proceed to Checkout
+                </a>
+                
+                <div class="flex flex-col items-center justify-center space-y-2 mt-2">
+                    <svg class="w-12 h-6 text-indigo-400/80" viewBox="0 0 100 42" fill="currentColor">
+                        <path d="M42.2 19.3c0-3.6-1.9-6.3-5.3-6.3-3.2 0-5.5 2.5-5.5 6.2 0 4.2 2.7 6.3 5.9 6.3 1.9 0 3.7-.6 4.6-1.1v-2.3c-.8.4-2.2.8-3.4.8-1.7 0-3.1-.7-3.2-2.3h10.9v-1.3zm-7.3-2.1c0-1.2.9-2.1 2-2.1 1 0 1.9.8 1.9 2.1h-3.9zM55.5 13.5c-1.6 0-3.1.9-3.8 1.7V7.1H48v23.2h3.7v-1.7c.7.7 2 1.7 3.8 1.7 3.3 0 5.7-2.6 5.7-6.2.1-4.7-2.4-7.6-5.7-7.6zm-1.2 10.7c-1.6 0-2.6-1.1-2.6-2.9 0-1.8 1-2.9 2.6-2.9 1.5 0 2.6 1.1 2.6 2.9.1 1.8-1 2.9-2.6 2.9zM10.9 19.4c0-2 .9-3.3 2.5-3.3 1.1 0 1.8.6 1.8 1.6 0 1.9-2.5 2.4-4.8 3-2.6.7-4.8 1.7-4.8 4.7 0 3.4 2.8 5.7 6.4 5.7 2.1 0 3.9-.9 4.7-1.8v1.5h3.7V22.2c0-4.3-3.2-6.5-7.3-6.5-2.2 0-4.5.7-5.5 1.4v2.7c1-.5 2.6-1.1 4-1.1 1.9 0 3 .8 3 2.1 0 2-2.6 2.3-4.9 2.9-2.6.7-4.7 1.8-4.7 4.7 0 2.2 1.6 3.6 3.6 3.6 1.9.1 3.8-1 4.5-2.1.1-1.7-1.1-2.4-2.8-2.9l-2-.5zM22.5 10c1.2 0 2.1-.9 2.1-2.1 0-1.2-.9-2.1-2.1-2.1s-2.1.9-2.1 2.1c.1 1.2 1 2.1 2.1 2.1zm1.9 3.8h-3.7V30.3h3.7V13.8zM69.8 13.8c-1.8 0-3.1 1-3.7 1.7v-1.7h-3.7v16.5h3.7v-8.4c0-2 1.2-3.1 2.7-3.1.5 0 .9.1 1.2.2v-3.7c-.4-.1-.9-.1-1.2-.1zM79.4 13.5c-3.5 0-5.7 2.6-5.7 6.3 0 4.1 2.5 6.3 5.7 6.3 1.6 0 3.1-.5 3.9-1v-2.3c-.6.3-1.8.7-2.9.7-1.6 0-2.8-1-2.9-2.5h10.1v-.8c0-4.1-2-6.7-5.4-6.7zm-1.8 4.2c0-1 .9-1.9 1.8-1.9 1 0 1.8.9 1.8 1.9h-3.6z"/>
+                    </svg>
+                    <span class="text-[10px] text-slate-500">Secure Checkout via Stripe Sandbox</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}

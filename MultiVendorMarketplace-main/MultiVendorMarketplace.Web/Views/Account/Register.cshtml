@@ -1,0 +1,134 @@
+@model MultiVendorMarketplace.Web.Controllers.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="relative min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <!-- Decorative Blurred Blobs -->
+    <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl -z-10 animate-pulse" style="animation-delay: 2s;"></div>
+
+    <div class="max-w-md w-full p-8 rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Create Account</h1>
+            <p class="text-xs text-slate-400 mt-2">Start purchasing products or list your goods for sale</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="Register" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl"></div>
+
+            <div>
+                <label asp-for="Email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
+                <input asp-for="Email" placeholder="you@example.com" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <span asp-validation-for="Email" class="text-xs text-rose-400 mt-1 block"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Password" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+                    <input asp-for="Password" type="password" placeholder="••••••••" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    <span asp-validation-for="Password" class="text-xs text-rose-400 mt-1 block"></span>
+                </div>
+                <div>
+                    <label asp-for="ConfirmPassword" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" placeholder="••••••••" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                    <span asp-validation-for="ConfirmPassword" class="text-xs text-rose-400 mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- Role Picker Cards -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Register As</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="radio" id="role-customer" name="UserType" value="Customer" checked class="role-card-radio hidden" />
+                    <label for="role-customer" class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-900/60 cursor-pointer transition-all duration-300">
+                        <span class="text-2xl mb-1">🛍️</span>
+                        <span class="text-xs font-bold text-white">I'm a Buyer</span>
+                        <span class="text-[9px] text-slate-500 mt-1">Discover & Purchase</span>
+                    </label>
+
+                    <input type="radio" id="role-vendor" name="UserType" value="Vendor" class="role-card-radio hidden" />
+                    <label for="role-vendor" class="flex flex-col items-center justify-center p-4 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-900/60 cursor-pointer transition-all duration-300">
+                        <span class="text-2xl mb-1">🏪</span>
+                        <span class="text-xs font-bold text-white">I'm a Seller</span>
+                        <span class="text-[9px] text-slate-500 mt-1">List & Sell Goods</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Conditional Customer Profile Details -->
+            <div id="customerSection" class="grid grid-cols-2 gap-4 transition-all duration-300 overflow-hidden" style="max-height: 200px; opacity: 1;">
+                <div>
+                    <label asp-for="FirstName" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">First Name</label>
+                    <input asp-for="FirstName" placeholder="Jane" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                </div>
+                <div>
+                    <label asp-for="LastName" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Last Name</label>
+                    <input asp-for="LastName" placeholder="Doe" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                </div>
+            </div>
+
+            <!-- Conditional Vendor Profile Details -->
+            <div id="vendorSection" class="space-y-4 transition-all duration-300 overflow-hidden hidden" style="max-height: 0px; opacity: 0;">
+                <div>
+                    <label asp-for="StoreName" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Store Name</label>
+                    <input asp-for="StoreName" placeholder="My Handmade Store" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                </div>
+                <div>
+                    <label asp-for="StoreDescription" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Store Description</label>
+                    <textarea asp-for="StoreDescription" rows="2" placeholder="Tell customers what you specialize in..." class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-bold py-3.5 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
+                Sign Up
+            </button>
+        </form>
+
+        <p class="text-center text-xs text-slate-400">
+            Already have an account? <a asp-controller="Account" asp-action="Login" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">Sign in</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const roles = document.querySelectorAll('input[name="UserType"]');
+        const custSection = document.getElementById('customerSection');
+        const vendSection = document.getElementById('vendorSection');
+
+        function toggleSections() {
+            const selectedRole = document.querySelector('input[name="UserType"]:checked').value;
+            if (selectedRole === 'Vendor') {
+                // Fade out customer section
+                custSection.style.maxHeight = '0px';
+                custSection.style.opacity = '0';
+                custSection.classList.add('pointer-events-none');
+                
+                // Fade in vendor section
+                vendSection.classList.remove('hidden');
+                setTimeout(() => {
+                    vendSection.style.maxHeight = '400px';
+                    vendSection.style.opacity = '1';
+                }, 50);
+            } else {
+                // Fade out vendor section
+                vendSection.style.maxHeight = '0px';
+                vendSection.style.opacity = '0';
+                
+                // Fade in customer section
+                custSection.classList.remove('pointer-events-none');
+                custSection.style.maxHeight = '200px';
+                custSection.style.opacity = '1';
+                setTimeout(() => {
+                    vendSection.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        roles.forEach(role => role.addEventListener('change', toggleSections));
+        // Initialize state
+        toggleSections();
+    </script>
+}

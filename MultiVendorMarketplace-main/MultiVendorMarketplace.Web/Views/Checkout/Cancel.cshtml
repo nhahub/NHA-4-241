@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Checkout Cancelled";
+}
+
+<div class="max-w-md mx-auto text-center py-20 px-8 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-6 shadow-2xl">
+    <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+        <svg class="h-12 w-12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+    </div>
+    <h1 class="text-2xl font-extrabold text-white tracking-tight leading-tight">Checkout Aborted</h1>
+    <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+        Your payment was not completed. No charges were made to your accounts. You can safely try checking out again or return to your cart.
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center gap-3 pt-4">
+        <a asp-controller="Checkout" asp-action="Index" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
+            Try Again
+        </a>
+        <a asp-controller="Cart" asp-action="Index" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-6 rounded-xl text-xs uppercase tracking-wider transition">
+            View Cart
+        </a>
+    </div>
+</div>

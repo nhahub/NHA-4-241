@@ -1,0 +1,109 @@
+@model IEnumerable<MultiVendorMarketplace.Domain.Entities.Product>
+@{
+    ViewData["Title"] = "My Product Listings";
+    bool storeApproved = ViewBag.VendorIsApproved == true;
+}
+
+<div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight">My Products</h1>
+        <p class="text-xs text-slate-400 mt-1">Manage your catalog items and check administrator approvals</p>
+    </div>
+    <a asp-action="CreateProduct" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 text-center">Add New Product</a>
+</div>
+
+@if (!storeApproved)
+{
+    <div class="mb-8 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start space-x-3 text-sm">
+        <svg class="w-5 h-5 shrink-0 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+            <span class="font-bold">Store Pending Approval:</span> Your store is currently awaiting administrator review. Even if your products are approved below, they will remain hidden from the public marketplace until your store profile is approved.
+        </div>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-20 p-8 rounded-2xl bg-slate-950/20 border border-dashed border-slate-800/80 flex flex-col items-center">
+        <svg class="h-16 w-16 text-slate-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+        <h3 class="text-base font-bold text-white">No products registered</h3>
+        <p class="mt-1.5 text-xs text-slate-500 max-w-xs leading-relaxed">Get started by creating your first product listing.</p>
+        <a asp-action="CreateProduct" class="mt-6 inline-block bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-600/30 transition uppercase tracking-wider">Add Product</a>
+    </div>
+}
+else
+{
+    <div class="overflow-x-auto rounded-3xl border border-slate-800/80 bg-slate-900/20 shadow-2xl">
+        <table class="min-w-full divide-y divide-slate-850 text-xs">
+            <thead class="bg-slate-950/40 text-[10px] text-slate-400 font-bold uppercase tracking-widest text-left">
+                <tr>
+                    <th scope="col" class="px-6 py-4">Product Details</th>
+                    <th scope="col" class="px-6 py-4">Category</th>
+                    <th scope="col" class="px-6 py-4">Price</th>
+                    <th scope="col" class="px-6 py-4">Stock</th>
+                    <th scope="col" class="px-6 py-4">Listing Status</th>
+                    <th scope="col" class="px-6 py-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-850 text-slate-300">
+                @foreach (var p in Model)
+                {
+                    <tr class="hover:bg-slate-900/40 transition-colors duration-200">
+                        <td class="px-6 py-4 flex items-center space-x-3 min-w-[240px]">
+                            <img src="@p.ImageUrl" alt="@p.Name" class="w-10 h-10 rounded-lg object-cover border border-slate-800 shrink-0" />
+                            <div class="min-w-0">
+                                <p class="font-bold text-white line-clamp-1 text-xs">@p.Name</p>
+                                <p class="text-[10px] text-slate-500 line-clamp-1 mt-0.5">@p.Description</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-400 font-semibold">@p.Category?.Name</td>
+                        <td class="px-6 py-4 font-bold text-white">@p.Price.ToString("C")</td>
+                        <td class="px-6 py-4">
+                            @if (p.StockQuantity <= 0)
+                            {
+                                <span class="text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg text-[9px]">Out of Stock</span>
+                            }
+                            else if (p.StockQuantity <= 3)
+                            {
+                                <span class="text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-[9px]">Low (@p.StockQuantity left)</span>
+                            }
+                            else
+                            {
+                                <span class="text-slate-400 font-semibold bg-slate-900/80 px-2.5 py-0.5 rounded-lg border border-slate-850">@p.StockQuantity</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4">
+                            @if (p.IsApproved)
+                            {
+                                if (storeApproved)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">✔ Live (Approved)</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">⏳ Store Pending</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">⏳ Pending Admin</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-3 shrink-0 min-w-[140px]">
+                            <a asp-action="EditProduct" asp-route-id="@p.Id" class="inline-flex items-center px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-lg text-[10px] uppercase transition border border-slate-800">Edit</a>
+                            
+                            <form asp-action="DeleteProduct" asp-route-id="@p.Id" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this listing?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="inline-flex items-center px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold rounded-lg text-[10px] uppercase transition border border-rose-500/15">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

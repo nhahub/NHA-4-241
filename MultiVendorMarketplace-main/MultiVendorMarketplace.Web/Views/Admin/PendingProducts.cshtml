@@ -1,0 +1,85 @@
+@model IEnumerable<MultiVendorMarketplace.Domain.Entities.Product>
+@{
+    ViewData["Title"] = "Pending Product Reviews";
+}
+
+<div class="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight">Pending Product Reviews</h1>
+        <p class="text-xs text-slate-400 mt-1">Review new submissions from sellers and approve them to list on the public marketplace.</p>
+    </div>
+    <a asp-action="Index" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition text-center shrink-0">Back to Panel</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-20 p-8 rounded-2xl bg-slate-950/20 border border-dashed border-slate-800/80 flex flex-col items-center">
+        <!-- Shield with check icon -->
+        <svg class="h-16 w-16 text-slate-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.75 3.75 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.75 3.75 0 0121 12z" />
+        </svg>
+        <h3 class="text-base font-bold text-white">No products pending review</h3>
+        <p class="mt-1.5 text-xs text-slate-500 max-w-xs leading-relaxed">All submitted items have been reviewed and approved.</p>
+        <a asp-action="Index" class="mt-6 inline-block bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-600/30 transition uppercase tracking-wider">Back to Dashboard</a>
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var p in Model)
+        {
+            <div class="group rounded-3xl border border-slate-800/80 bg-slate-900/20 flex flex-col justify-between overflow-hidden shadow-2xl hover:border-indigo-500/40 transition-all duration-300">
+                <div>
+                    <div class="relative h-44 overflow-hidden bg-slate-950">
+                        <img src="@p.ImageUrl" alt="@p.Name" class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-103" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none"></div>
+                    </div>
+                    
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] mb-3">
+                                <span class="bg-indigo-500/10 text-indigo-400 font-bold px-2.5 py-0.5 rounded-lg border border-indigo-500/10 uppercase">@p.Category?.Name</span>
+                                <span class="text-slate-500 font-semibold italic">Store: @p.Vendor?.StoreName</span>
+                            </div>
+                            
+                            @if (p.Vendor != null && !p.Vendor.IsApproved)
+                            {
+                                <div class="bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] font-semibold p-3 rounded-2xl mb-3 flex items-start space-x-2">
+                                    <svg class="w-4.5 h-4.5 shrink-0 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Store is pending approval. Approving this product alone won't list it publicly.</span>
+                                </div>
+                            }
+                            <h3 class="text-sm font-bold text-white line-clamp-1 group-hover:text-indigo-400 transition-colors duration-300">@p.Name</h3>
+                            <p class="text-xs text-slate-400 line-clamp-3 mt-1.5 leading-relaxed">@p.Description</p>
+                        </div>
+                        
+                        <div class="flex justify-between items-baseline border-t border-slate-950 pt-3 text-[10px]">
+                            <span class="text-slate-500 font-bold uppercase tracking-wider">Suggested Price</span>
+                            <span class="text-base font-black text-white">@p.Price.ToString("C")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-5 pt-0 space-y-2">
+                    @if (p.Vendor != null && !p.Vendor.IsApproved)
+                    {
+                        <form asp-action="ApproveVendor" asp-route-id="@p.Vendor.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold py-2 rounded-xl text-[10px] uppercase tracking-wider transition shadow-lg shadow-amber-500/10">
+                                Approve Store: @p.Vendor.StoreName
+                            </button>
+                        </form>
+                    }
+                    <form asp-action="ApproveProduct" asp-route-id="@p.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-[10px] uppercase tracking-wider transition shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
+                            Approve & Publish Listing
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

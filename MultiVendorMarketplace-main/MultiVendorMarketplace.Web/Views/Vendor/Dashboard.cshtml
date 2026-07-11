@@ -1,0 +1,258 @@
+@model MultiVendorMarketplace.Application.Models.VendorDashboardViewModel
+@{
+    ViewData["Title"] = "Store Dashboard";
+    var serializedMonths = System.Text.Json.JsonSerializer.Serialize(Model.SalesHistory.Select(h => h.Month).ToArray());
+    var serializedSales = System.Text.Json.JsonSerializer.Serialize(Model.SalesHistory.Select(h => h.Sales).ToArray());
+    var serializedEarnings = System.Text.Json.JsonSerializer.Serialize(Model.SalesHistory.Select(h => h.Earnings).ToArray());
+}
+
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight flex items-center">
+            <span>Store Dashboard</span>
+            <span class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">Commission: 10%</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">Managing Store: <span class="text-violet-400 font-semibold">@Model.StoreName</span></p>
+    </div>
+
+    <!-- Stripe Connection Action -->
+    <div>
+        @if (string.IsNullOrEmpty(Model.StripeAccountId))
+        {
+            <form asp-controller="Vendor" asp-action="OnboardStripe" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/10">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Link Stripe Connected Account
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="inline-flex items-center px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-xl text-xs uppercase tracking-wider">
+                <svg class="w-4 h-4 mr-2 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a.75.75 0 00-.708-.523H4.5a2 2 0 00-2 2v8.5a2 2 0 002 2h8.5a2 2 0 002-2v-1.06a.75.75 0 00-.523-.707L6.267 3.455zM5 12V6l6 6H5z" clip-rule="evenodd"></path>
+                </svg>
+                Stripe Linked: @Model.StripeAccountId.Substring(0, Math.Min(12, Model.StripeAccountId.Length))...
+            </div>
+        }
+    </div>
+</div>
+
+@if (!Model.IsApproved)
+{
+    <div class="mb-8 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start space-x-3 text-sm">
+        <svg class="w-5 h-5 shrink-0 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+            <span class="font-bold">Store Pending Approval:</span> Your store is currently awaiting administrator review and approval. While you can configure your products, they will not be visible on the public marketplace until your store profile is approved by an Admin.
+        </div>
+    </div>
+}
+
+@if (string.IsNullOrEmpty(Model.StripeAccountId))
+{
+    <div class="mb-8 p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start space-x-3 text-sm">
+        <svg class="w-5 h-5 shrink-0 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+            <span class="font-bold">Payouts Disabled:</span> Payout processing remains pending until you connect a sandbox Stripe Connect account. Users can still buy your products, but split transfers will remain in pending state. Click the onboarding button above to assign a mock account immediately.
+        </div>
+    </div>
+}
+
+<!-- Metrics Summary Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-indigo-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Gross Sales</p>
+            <p class="text-2xl font-black text-white mt-1">@Model.TotalSales.ToString("C")</p>
+            <p class="text-[10px] text-emerald-400 font-bold mt-1">▲ +12.4% <span class="text-slate-600 font-normal">v. last month</span></p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-emerald-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Net Earnings</p>
+            <p class="text-2xl font-black text-emerald-400 mt-1">@Model.TotalEarnings.ToString("C")</p>
+            <p class="text-[10px] text-emerald-400 font-bold mt-1">▲ +8.2% <span class="text-slate-600 font-normal">after fees</span></p>
+        </div>
+        <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5M5.25 7.5h13.5m-12 3h10.5m-12 3h10.5m-12 3h10.5m-12 3h10.5m-12 3h10.5"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-rose-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Platform Commission</p>
+            <p class="text-2xl font-black text-rose-400 mt-1">@Model.PlatformCommissionDeducted.ToString("C")</p>
+            <p class="text-[10px] text-rose-400 font-bold mt-1">▲ +10.0% <span class="text-slate-600 font-normal">marketplace cut</span></p>
+        </div>
+        <div class="p-3 bg-rose-500/10 rounded-xl text-rose-400 border border-rose-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-violet-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Products</p>
+            <p class="text-2xl font-black text-violet-400 mt-1">@Model.ProductsCount</p>
+            <p class="text-[10px] text-violet-400 font-bold mt-1">▲ +2 new <span class="text-slate-600 font-normal">this week</span></p>
+        </div>
+        <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400 border border-violet-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Chart Container -->
+    <div class="lg:col-span-2 p-6 rounded-3xl bg-slate-900/20 border border-slate-800/80 shadow-xl">
+        <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3 uppercase tracking-wider text-slate-400">Sales Analytics</h2>
+        <div class="h-80 mt-4">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Vendor Orders -->
+    <div class="lg:col-span-1 p-6 rounded-3xl bg-slate-900/20 border border-slate-800/80 flex flex-col justify-between shadow-xl">
+        <div>
+            <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3 uppercase tracking-wider text-slate-400">Recent Sales</h2>
+            @if (!Model.RecentOrders.Any())
+            {
+                <div class="text-center py-12 text-slate-500 text-xs">
+                    No sales recorded yet.
+                </div>
+            }
+            else
+            {
+                <div class="space-y-3 mt-4">
+                    @foreach (var item in Model.RecentOrders)
+                    {
+                        <div class="flex justify-between items-center p-3 rounded-xl border border-slate-850 bg-slate-950/20 text-[10px] shadow-sm">
+                            <div class="min-w-0 pr-2">
+                                <p class="font-bold text-white text-xs line-clamp-1">@item.ProductName</p>
+                                <p class="text-slate-400 mt-0.5">Qty: @item.Quantity • Buyer: @item.CustomerName</p>
+                                <p class="text-[9px] text-slate-500 mt-0.5">@item.OrderDate.ToString("MM/dd/yyyy hh:mm tt")</p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="font-bold text-emerald-400 text-xs">+@item.Payout.ToString("C")</p>
+                                <span class="inline-flex px-2 py-0.5 rounded-lg text-[8px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/10 mt-1">@item.PayoutStatus</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="pt-4 border-t border-slate-850 mt-4">
+            <a asp-controller="Vendor" asp-action="Products" class="block text-center text-xs text-indigo-400 hover:text-indigo-300 font-bold transition">
+                Manage Product Listings
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Include Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = @Html.Raw(serializedMonths);
+        const sales = @Html.Raw(serializedSales);
+        const earnings = @Html.Raw(serializedEarnings);
+
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Gross Sales ($)',
+                        data: sales,
+                        borderColor: '#6366f1', // Indigo 500
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Net Earnings ($)',
+                        data: earnings,
+                        borderColor: '#10b981', // Emerald 500
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#94a3b8', // Slate 400
+                            font: {
+                                family: 'Outfit, sans-serif',
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        titleFont: { family: 'Outfit, sans-serif' },
+                        bodyFont: { family: 'Outfit, sans-serif' },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.03)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit, sans-serif', size: 10 }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.03)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit, sans-serif', size: 10 },
+                            callback: function(value, index, values) {
+                                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

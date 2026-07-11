@@ -1,0 +1,110 @@
+@using MultiVendorMarketplace.Application.Models
+@{
+    ViewData["Title"] = "Delivery Details";
+    var cart = ViewBag.Cart as Cart ?? new Cart();
+}
+
+<!-- Step Progress Bar -->
+<div class="mb-8 max-w-lg mx-auto">
+    <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <span class="text-indigo-400 flex items-center"><span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center mr-1.5 text-[9px]">1</span> Cart</span>
+        <span class="w-12 h-px bg-indigo-600"></span>
+        <span class="text-indigo-400 flex items-center"><span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center mr-1.5 text-[9px]">2</span> Checkout</span>
+        <span class="w-12 h-px bg-slate-800"></span>
+        <span class="flex items-center text-slate-600"><span class="w-5 h-5 rounded-full bg-slate-900 text-slate-600 flex items-center justify-center mr-1.5 text-[9px]">3</span> Payment</span>
+        <span class="w-12 h-px bg-slate-800"></span>
+        <span class="flex items-center text-slate-600"><span class="w-5 h-5 rounded-full bg-slate-900 text-slate-600 flex items-center justify-center mr-1.5 text-[9px]">4</span> Success</span>
+    </div>
+</div>
+
+<h1 class="text-3xl font-extrabold text-white mb-8 tracking-tight">Delivery Details</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Shipping Address Form -->
+    <div class="lg:col-span-2">
+        <div class="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-6 shadow-xl">
+            <h2 class="text-base font-bold text-white border-b border-slate-850 pb-3">Shipping Information</h2>
+
+            <form asp-controller="Checkout" asp-action="ProcessCheckout" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Full Name</label>
+                        <input type="text" name="fullName" required value="Jane Doe" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Contact Email</label>
+                        <input type="email" name="email" required value="jane.doe@example.com" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Street Address</label>
+                    <textarea name="streetAddress" required rows="2" placeholder="Street Address, Apartment, Suite, Unit..." class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm">123 Creative Lane</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">City</label>
+                        <input type="text" name="city" required value="San Francisco" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">State / Province</label>
+                        <input type="text" name="state" required value="CA" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Postal Code</label>
+                        <input type="text" name="postalCode" required value="94107" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm" />
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-850">
+                    <button type="submit" class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 text-xs uppercase tracking-wider">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
+                        </svg>
+                        Place Order & Pay with Stripe Sandbox
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Summary Column -->
+    <div class="lg:col-span-1">
+        <div class="p-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 space-y-6 shadow-xl">
+            <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3">Your Order</h2>
+            
+            <div class="space-y-4">
+                @foreach (var item in cart.Items)
+                {
+                    <div class="flex items-center space-x-3 text-sm">
+                        <img src="@item.ImageUrl" alt="@item.ProductName" class="w-10 h-10 rounded-lg object-cover border border-slate-800 shrink-0" />
+                        <div class="flex-grow min-w-0">
+                            <p class="font-semibold text-white line-clamp-1 text-xs">@item.ProductName</p>
+                            <p class="text-[10px] text-slate-500">Qty: @item.Quantity</p>
+                        </div>
+                        <span class="text-slate-300 font-medium shrink-0 text-xs">@item.TotalPrice.ToString("C")</span>
+                    </div>
+                }
+            </div>
+
+            <div class="border-t border-slate-850 pt-4 space-y-3 text-xs text-slate-400">
+                <div class="flex justify-between">
+                    <span>Items Total</span>
+                    <span class="text-white font-medium">@cart.TotalAmount.ToString("C")</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Shipping fee</span>
+                    <span class="text-emerald-400 font-bold">FREE</span>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-850 pt-4 flex justify-between items-baseline">
+                <span class="text-xs font-bold text-slate-400">Order Total</span>
+                <span class="text-xl font-black text-indigo-400">@cart.TotalAmount.ToString("C")</span>
+            </div>
+        </div>
+    </div>
+</div>

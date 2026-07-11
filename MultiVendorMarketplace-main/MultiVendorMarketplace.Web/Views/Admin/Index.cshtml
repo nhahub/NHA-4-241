@@ -1,0 +1,219 @@
+@model MultiVendorMarketplace.Application.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Global Admin Console";
+    var serializedMonths = System.Text.Json.JsonSerializer.Serialize(Model.GlobalSalesHistory.Select(h => h.Month).ToArray());
+    var serializedSales = System.Text.Json.JsonSerializer.Serialize(Model.GlobalSalesHistory.Select(h => h.Sales).ToArray());
+    var serializedCommissions = System.Text.Json.JsonSerializer.Serialize(Model.GlobalSalesHistory.Select(h => h.Earnings).ToArray());
+}
+
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight">Marketplace Admin Console</h1>
+        <p class="text-xs text-slate-400 mt-1">Supervising multi-vendor operations, payout transactions, and system diagnostics.</p>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+        <a asp-action="Vendors" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition">Manage All Vendors</a>
+        <a asp-action="PendingProducts" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600/30 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition">Pending Products (@(ViewBag.PendingProductsCount ?? 0))</a>
+    </div>
+</div>
+
+<!-- Global KPIs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-indigo-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Volume</p>
+            <p class="text-2xl font-black text-white mt-1">@Model.TotalMarketplaceSales.ToString("C")</p>
+            <p class="text-[10px] text-emerald-400 font-bold mt-1">▲ +14.2% <span class="text-slate-600 font-normal">v. last month</span></p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-violet-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Platform Profits</p>
+            <p class="text-2xl font-black text-indigo-400 mt-1">@Model.TotalCommissionEarned.ToString("C")</p>
+            <p class="text-[10px] text-emerald-400 font-bold mt-1">▲ +10.0% <span class="text-slate-600 font-normal">cut commission</span></p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-amber-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active Vendors</p>
+            <p class="text-2xl font-black text-white mt-1">@Model.TotalVendorsCount</p>
+            <p class="text-[10px] text-amber-400 font-bold mt-1">⏳ @Model.PendingVendorsCount applications pending</p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 20M3.75 20.25h16.5M3.75 20.25a8.967 8.967 0 01-2.285-3.34M3.75 20.25a8.967 8.967 0 002.285-3.34m0 0A13.978 13.978 0 0110 16c2.63 0 5.064.723 7.135 1.98M6.035 16.91A9.39 9.39 0 0110 16c1.378 0 2.68.257 3.878.723M10 12a3 3 0 100-6 3 3 0 000 6z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-850 flex justify-between items-center shadow-lg hover:border-emerald-500/50 transition">
+        <div>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Purchases</p>
+            <p class="text-2xl font-black text-white mt-1">@Model.OrdersCount</p>
+            <p class="text-[10px] text-emerald-400 font-bold mt-1">▲ +35 new <span class="text-slate-600 font-normal">completed orders</span></p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.481c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664M9 21h6M3 6.108c0-1.135.845-2.098 1.976-2.192 1.253-.104 2.502-.17 3.751-.2v1.62c0 .414.336.75.75.75H10.5M3 6.108v11.642a2.25 2.25 0 002.25 2.25h3.75M3 6.108c.178-.015.356-.027.534-.037M9 3H4.5M9 3h4.5"></path>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Sales Chart -->
+    <div class="lg:col-span-2 p-6 rounded-3xl bg-slate-900/20 border border-slate-800/80 shadow-xl">
+        <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3 uppercase tracking-wider text-slate-400">Marketplace Growth & Commissions</h2>
+        <div class="h-80 mt-4">
+            <canvas id="globalChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Pending Vendor Approvals -->
+    <div class="lg:col-span-1 p-6 rounded-3xl bg-slate-900/20 border border-slate-800/80 shadow-xl flex flex-col justify-between">
+        <div>
+            <h2 class="text-sm font-bold text-white border-b border-slate-850 pb-3 uppercase tracking-wider text-slate-400">Pending Vendor Reviews</h2>
+            @if (!Model.PendingVendors.Any())
+            {
+                <div class="text-center py-12 text-slate-500 text-xs">
+                    No vendor applications requiring approval.
+                </div>
+            }
+            else
+            {
+                <div class="space-y-4 mt-4">
+                    @foreach (var v in Model.PendingVendors)
+                    {
+                        <div class="p-4 rounded-xl bg-slate-950/40 border border-slate-850 text-xs space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-white text-xs">@v.StoreName</p>
+                                    <p class="text-slate-500 mt-0.5">Contact: @(v.User?.Email ?? "N/A")</p>
+                                </div>
+                                <span class="bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded text-[10px] border border-amber-500/10">Pending</span>
+                            </div>
+                            <p class="text-slate-400 line-clamp-2">@v.Description</p>
+                            
+                            <form asp-action="ApproveVendor" asp-route-id="@v.Id" method="post" class="pt-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-lg transition text-[10px] uppercase tracking-wider">
+                                    Approve Store & Listings
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        
+        <!-- Platform Status Box -->
+        <div class="pt-4 border-t border-slate-850 mt-4 space-y-2 text-xs text-slate-400">
+            <div class="flex justify-between">
+                <span>System Status</span>
+                <span class="text-emerald-400 font-bold">● Active (99.98%)</span>
+            </div>
+            <div class="flex justify-between">
+                <span>DB Engine Connection</span>
+                <span class="text-white font-semibold">SQL Server (Docker)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = @Html.Raw(serializedMonths);
+        const sales = @Html.Raw(serializedSales);
+        const commissions = @Html.Raw(serializedCommissions);
+
+        const ctx = document.getElementById('globalChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Marketplace Volume ($)',
+                        data: sales,
+                        backgroundColor: 'rgba(99, 102, 241, 0.5)', // Indigo
+                        borderColor: '#6366f1',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Platform Net Profits ($)',
+                        data: commissions,
+                        backgroundColor: 'rgba(168, 85, 247, 0.5)', // Purple
+                        borderColor: '#a855f7',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit, sans-serif', size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        titleFont: { family: 'Outfit, sans-serif' },
+                        bodyFont: { family: 'Outfit, sans-serif' },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.03)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit, sans-serif', size: 10 }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.03)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { family: 'Outfit, sans-serif', size: 10 },
+                            callback: function(value, index, values) {
+                                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

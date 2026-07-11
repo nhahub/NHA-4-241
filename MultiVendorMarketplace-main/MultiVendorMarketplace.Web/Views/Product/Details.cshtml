@@ -1,0 +1,158 @@
+@model MultiVendorMarketplace.Domain.Entities.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="mb-6">
+    <a asp-controller="Home" asp-action="Index" class="inline-flex items-center text-sm text-slate-400 hover:text-white transition">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Marketplace
+    </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 p-8 rounded-3xl bg-slate-900/40 border border-slate-800/80 shadow-2xl">
+    <!-- Image Gallery -->
+    <div class="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-inner group">
+        <img src="@Model.ImageUrl" alt="@Model.Name" class="w-full h-96 object-cover object-center transition-transform duration-500 group-hover:scale-102" />
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none"></div>
+    </div>
+
+    <!-- Product Meta -->
+    <div class="flex flex-col justify-between space-y-6">
+        <div>
+            <!-- Breadcrumbs / tags -->
+            <div class="flex items-center space-x-3 text-[10px] mb-4">
+                <span class="text-indigo-400 font-bold bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                    @Model.Category?.Name
+                </span>
+                <span class="text-slate-500 font-semibold">ADDED @Model.CreatedAt.ToString("MMMM dd, yyyy").ToUpper()</span>
+            </div>
+
+            <!-- Product Title -->
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">@Model.Name</h1>
+
+            <!-- Price -->
+            <div class="mt-4 flex items-baseline">
+                <span class="text-3xl font-black text-white">@Model.Price.ToString("C")</span>
+                <span class="ml-2 text-xs font-bold text-slate-500 uppercase tracking-widest">USD</span>
+            </div>
+
+            <!-- Description -->
+            <div class="mt-6 border-t border-slate-800/80 pt-6">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Description</h3>
+                <p class="mt-2 text-sm text-slate-300 leading-relaxed">@Model.Description</p>
+            </div>
+
+            <!-- Vendor card -->
+            <div class="mt-6 p-4 rounded-2xl bg-slate-950/40 border border-slate-800/80 flex items-center space-x-4">
+                @if (!string.IsNullOrEmpty(Model.Vendor?.LogoUrl))
+                {
+                    <img src="@Model.Vendor.LogoUrl" alt="@Model.Vendor.StoreName" class="w-12 h-12 rounded-full border border-slate-700 object-cover" />
+                }
+                else
+                {
+                    <div class="w-12 h-12 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center font-bold text-indigo-400">
+                        @Model.Vendor?.StoreName.Substring(0, 1).ToUpper()
+                    </div>
+                }
+                <div>
+                    <h4 class="text-sm font-bold text-white">@Model.Vendor?.StoreName</h4>
+                    <p class="text-xs text-slate-400 mt-1">@Model.Vendor?.Description</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Action Panel -->
+        <div class="border-t border-slate-800/85 pt-6">
+            @if (Model.StockQuantity > 0)
+            {
+                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    
+                    <div class="flex items-center space-x-4">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Quantity</label>
+                        <div class="flex items-center space-x-1 bg-slate-950 border border-slate-800 rounded-xl p-1 shrink-0">
+                            <button type="button" onclick="decrementQty()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition font-bold text-lg select-none">-</button>
+                            <input type="number" id="stepper-quantity" name="quantity" value="1" min="1" max="@Math.Min(10, Model.StockQuantity)" class="w-12 bg-transparent text-center text-sm text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" readonly />
+                            <button type="button" onclick="incrementQty()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition font-bold text-lg select-none">+</button>
+                        </div>
+                        
+                        <span class="text-xs font-semibold">
+                            @if (Model.StockQuantity <= 3)
+                            {
+                                <span class="text-amber-400">⚠ Low Stock (@Model.StockQuantity remaining)</span>
+                            }
+                            else
+                            {
+                                <span class="text-emerald-400">✔ In Stock (@Model.StockQuantity remaining)</span>
+                            }
+                        </span>
+                    </div>
+
+                    <button type="submit" class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all duration-300 hover-cart-bounce">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
+                        </svg>
+                        Add to Shopping Cart
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center text-rose-400 font-bold text-sm">
+                    Out of Stock
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations Placeholder -->
+<div class="mt-16 border-t border-slate-900 pt-10">
+    <h2 class="text-xl font-bold text-white mb-6">You May Also Like</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 opacity-60">
+        <div class="rounded-2xl bg-slate-950/20 border border-slate-800/80 p-4 space-y-3">
+            <div class="h-32 bg-slate-900 rounded-xl"></div>
+            <div class="h-4 bg-slate-900 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-900 rounded w-1/2"></div>
+        </div>
+        <div class="rounded-2xl bg-slate-950/20 border border-slate-800/80 p-4 space-y-3">
+            <div class="h-32 bg-slate-900 rounded-xl"></div>
+            <div class="h-4 bg-slate-900 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-900 rounded w-1/2"></div>
+        </div>
+        <div class="rounded-2xl bg-slate-950/20 border border-slate-800/80 p-4 space-y-3">
+            <div class="h-32 bg-slate-900 rounded-xl"></div>
+            <div class="h-4 bg-slate-900 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-900 rounded w-1/2"></div>
+        </div>
+        <div class="rounded-2xl bg-slate-950/20 border border-slate-800/80 p-4 space-y-3">
+            <div class="h-32 bg-slate-900 rounded-xl"></div>
+            <div class="h-4 bg-slate-900 rounded w-2/3"></div>
+            <div class="h-3 bg-slate-900 rounded w-1/2"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function incrementQty() {
+            const qtyInput = document.getElementById('stepper-quantity');
+            const max = parseInt(qtyInput.getAttribute('max'));
+            let val = parseInt(qtyInput.value);
+            if (val < max) {
+                qtyInput.value = val + 1;
+            }
+        }
+        function decrementQty() {
+            const qtyInput = document.getElementById('stepper-quantity');
+            let val = parseInt(qtyInput.value);
+            if (val > 1) {
+                qtyInput.value = val - 1;
+            }
+        }
+    </script>
+}

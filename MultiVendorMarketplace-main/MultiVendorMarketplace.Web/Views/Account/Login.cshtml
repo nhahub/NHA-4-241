@@ -1,0 +1,78 @@
+@model MultiVendorMarketplace.Web.Controllers.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="relative min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <!-- Decorative Blurred Blobs -->
+    <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl -z-10 animate-pulse" style="animation-delay: 2s;"></div>
+
+    <div class="max-w-md w-full p-8 rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Welcome Back</h1>
+            <p class="text-xs text-slate-400 mt-2">Sign in to your customer or vendor account</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="Login" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl"></div>
+
+            <div>
+                <label asp-for="Email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
+                <input asp-for="Email" placeholder="you@example.com" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <span asp-validation-for="Email" class="text-xs text-rose-400 mt-1 block"></span>
+            </div>
+
+            <div>
+                <label asp-for="Password" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
+                <input asp-for="Password" type="password" placeholder="••••••••" class="w-full rounded-xl bg-slate-950/80 border border-slate-800 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+                <span asp-validation-for="Password" class="text-xs text-rose-400 mt-1 block"></span>
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center">
+                    <input asp-for="RememberMe" class="h-4.5 w-4.5 rounded-lg border-slate-800 bg-slate-950 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 focus:ring-offset-2" />
+                    <label asp-for="RememberMe" class="ml-2 block text-xs text-slate-400">Remember me?</label>
+                </div>
+                <a href="#" class="text-xs text-indigo-400 hover:text-indigo-300 transition" title="Password reset not yet implemented">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white font-bold py-3.5 rounded-xl transition duration-300 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Preseeded Quick Logins -->
+        <div class="border-t border-slate-850 pt-5 space-y-3">
+            <p class="text-center text-[10px] text-slate-500 font-bold uppercase tracking-wider">Demo Access Credentials</p>
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="fillLogin('admin@marketplace.com', 'AdminPassword123!')" class="flex flex-col items-center p-2 rounded-xl bg-slate-950/40 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-indigo-300 transition font-semibold hover:border-indigo-500/30">
+                    <span class="text-base mb-1">🛡️</span>
+                    <span>Admin</span>
+                </button>
+                <button type="button" onclick="fillLogin('vendor@marketplace.com', 'VendorPassword123!')" class="flex flex-col items-center p-2 rounded-xl bg-slate-950/40 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-violet-300 transition font-semibold hover:border-violet-500/30">
+                    <span class="text-base mb-1">🏪</span>
+                    <span>Vendor</span>
+                </button>
+                <button type="button" onclick="fillLogin('customer@marketplace.com', 'CustomerPassword123!')" class="flex flex-col items-center p-2 rounded-xl bg-slate-950/40 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-emerald-300 transition font-semibold hover:border-emerald-500/30">
+                    <span class="text-base mb-1">🛍️</span>
+                    <span>Customer</span>
+                </button>
+            </div>
+        </div>
+
+        <p class="text-center text-xs text-slate-400">
+            New to MarketHub? <a asp-controller="Account" asp-action="Register" class="text-indigo-400 hover:text-indigo-300 font-semibold transition">Create an account</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function fillLogin(email, pass) {
+            document.querySelector('input[name="Email"]').value = email;
+            document.querySelector('input[name="Password"]').value = pass;
+        }
+    </script>
+}

@@ -1,0 +1,81 @@
+@model IEnumerable<MultiVendorMarketplace.Domain.Entities.Vendor>
+@{
+    ViewData["Title"] = "Marketplace Sellers";
+}
+
+<div class="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+    <div>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight">Marketplace Vendors</h1>
+        <p class="text-xs text-slate-400 mt-1">Global list of all registered store sellers and payout setups.</p>
+    </div>
+    <a asp-action="Index" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition text-center shrink-0">Back to Panel</a>
+</div>
+
+<div class="overflow-x-auto rounded-3xl border border-slate-800/80 bg-slate-900/20 shadow-2xl">
+    <table class="min-w-full divide-y divide-slate-850 text-xs">
+        <thead class="bg-slate-950/40 text-[10px] text-slate-400 font-bold uppercase tracking-widest text-left">
+            <tr>
+                <th scope="col" class="px-6 py-4">Store Name</th>
+                <th scope="col" class="px-6 py-4">Owner Email</th>
+                <th scope="col" class="px-6 py-4">Joined Date</th>
+                <th scope="col" class="px-6 py-4">Commission Fee</th>
+                <th scope="col" class="px-6 py-4">Stripe Account ID</th>
+                <th scope="col" class="px-6 py-4">Approval State</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-850 text-slate-300">
+            @foreach (var v in Model)
+            {
+                <tr class="hover:bg-slate-900/40 transition-colors duration-200">
+                    <td class="px-6 py-4 flex items-center space-x-3 min-w-[240px]">
+                        @if (!string.IsNullOrEmpty(v.LogoUrl))
+                        {
+                            <img src="@v.LogoUrl" alt="@v.StoreName" class="w-8 h-8 rounded-full border border-slate-800 object-cover shrink-0" />
+                        }
+                        else
+                        {
+                            <div class="w-8 h-8 rounded-full border border-slate-800 bg-slate-900 flex items-center justify-center font-bold text-indigo-400 text-[10px] shrink-0">
+                                @v.StoreName.Substring(0, 1).ToUpper()
+                            </div>
+                        }
+                        <div class="min-w-0">
+                            <p class="font-bold text-white text-xs line-clamp-1">@v.StoreName</p>
+                            <p class="text-[10px] text-slate-500 line-clamp-1 mt-0.5">@v.Description</p>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-400 font-semibold">@(v.User?.Email ?? "N/A")</td>
+                    <td class="px-6 py-4 text-slate-500 font-semibold">@v.CreatedAt.ToString("MM/dd/yyyy")</td>
+                    <td class="px-6 py-4 font-bold text-indigo-400">@((v.CommissionRate * 100).ToString("0"))%</td>
+                    <td class="px-6 py-4 font-mono text-[10px]">
+                        @if (string.IsNullOrEmpty(v.StripeAccountId))
+                        {
+                            <span class="text-amber-500 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">Not Configured</span>
+                        }
+                        else
+                        {
+                            <span class="text-slate-400 bg-slate-900/80 px-2.5 py-0.5 rounded-lg border border-slate-850">@v.StripeAccountId</span>
+                        }
+                    </td>
+                    <td class="px-6 py-4 min-w-[180px]">
+                        @if (v.IsApproved)
+                        {
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">✔ Live</span>
+                        }
+                        else
+                        {
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">⏳ Pending Approval</span>
+                                <form asp-action="ApproveVendor" asp-route-id="@v.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-lg text-[9px] uppercase tracking-wider transition shadow-md shadow-emerald-600/10">
+                                        Approve Store
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
